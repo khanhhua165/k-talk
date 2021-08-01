@@ -44,7 +44,7 @@ export default class UsersController implements Controller {
             upsert: true,
           }
         )
-        .populate("friends", "name email picture isOnline");
+        .populate("friends", "name email picture isOnline friends");
       res.status(200).json({ user });
     } catch (e) {
       return next(new HttpError());
@@ -67,17 +67,4 @@ export default class UsersController implements Controller {
       return next(new HttpError());
     }
   };
-
-  // private createToken(user: IUser): TokenData {
-  //   const expiresIn = 60 * 60;
-  //   const secret = process.env.JWT_SECRET;
-  //   const dataStoredInToken: DataStoredInToken = {
-  //     _id: user._id,
-  //     name: user.name,
-  //   };
-  //   return {
-  //     expiresIn,
-  //     token: jwt.sign(dataStoredInToken, secret!, { expiresIn }),
-  //   };
-  // }
 }

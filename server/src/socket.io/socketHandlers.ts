@@ -1,21 +1,18 @@
 import { IUser } from "./../routes/users/user.interface";
-import { SocketMore } from "./../interfaces/socket.interface";
 import userModel from "../routes/users/user.model";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 
-export const socketHandlers = (io: Server, socket: SocketMore) => {
+export const socketHandlers = (io: Server, socket: Socket) => {
+  const userId: string = socket.handshake.auth.userId!;
   const getOnlineNotifications = ({ friendIds }: { friendIds: string[] }) => {
-    socket.broadcast.to(friendIds).emit("friend online", socket.userId!);
+    io.to(friendIds).emit("friend online", userId);
   };
 
   const addFriend = async (email: string) => {
-    const userId = socket.userId!;
     try {
       const friend = await userModel.findOne({ email });
       if (!friend) {
-        socket
-          .to(userId)
-          .emit("add friend:err", "No user found with this email");
+        io.to(userId).emit("add friend:err", "No user found with this email");
       } else {
         const updatedUser = await userModel.findByIdAndUpdate(
           userId,
@@ -25,35 +22,53 @@ export const socketHandlers = (io: Server, socket: SocketMore) => {
         await userModel.findByIdAndUpdate(friend._id, {
           $push: { friends: updatedUser!._id },
         });
-        socket.to(userId).emit("add friend:success");
-        socket.broadcast
-          .to(friend._id)
-          .emit("add friend:new", updatedUser!.email);
-      }
-    } catch (e) {
-      socket
-        .to(userId)
-        .emit(
-          "add friend:err",
-          "There was an unexpected error, Please try again"
+        io.to(userId).emit("add friend:success", {
+          _id: friend._id,
+          name: friend.name,
+          isOnline: friend.isOnline,
+          picture: friend.picture,
+        });
+        socket.broadcast.emit(
+          "add friend:request",
+          {
+            _id: updatedUser!._id,
+            picture: updatedUser!.picture,
+            name: updatedUser!.name,
+            email: updatedUser!.email,
+            isOnline: true,
+          },
+          friend._id
         );
-    }
-  };
-
-  const getFriendList = async () => {
-    try {
-      const user = await userModel
-        .findById(socket.userId!, "friends")
-        .populate("friends");
-      const friendList = user!.friends as unknown as IUser[];
-      socket.emit("get friends:success", friendList);
+      }
     } catch (e: unknown) {
-      socket.emit(
-        "get friends:err",
-        "There was an expected problem, please try again."
+      io.to(userId).emit(
+        "add friend:err",
+        "There was an unexpected error, Please try again"
       );
     }
   };
 
-  return { getOnlineNotifications, addFriend, getFriendList };
+  const handlePrivateMessage = (
+    sender: string,
+    to: string,
+    message: string
+  ) => {
+    io.to(to).emit("private message", sender, message);
+  };
+
+  const handleDisconnect = async () => {
+    await userModel.findByIdAndUpdate(
+      userId,
+      { isOnline: false },
+      { new: true }
+    );
+    io.emit("user disconnection", userId);
+  };
+
+  return {
+    getOnlineNotifications,
+    addFriend,
+    handlePrivateMessage,
+    handleDisconnect,
+  };
 };

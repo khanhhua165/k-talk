@@ -1,4 +1,3 @@
-import { SocketMore } from "./interfaces/socket.interface";
 import express from "express";
 import cors from "cors";
 import http from "http";
@@ -6,7 +5,7 @@ import mongoose from "mongoose";
 import Controller from "./interfaces/controller.interface";
 import errorMiddleware from "./middlewares/error.middleware";
 import morgan from "morgan";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { socketHandlers } from "./socket.io/socketHandlers";
 
 class App {
@@ -50,14 +49,19 @@ class App {
 
   private socketIo() {
     const io = this.io;
-    const onConnection = async (socket: SocketMore) => {
-      const userId = socket.userId!;
+    const onConnection = async (socket: Socket) => {
+      const userId: string = socket.handshake.auth.userId!;
       socket.join(userId);
-      const { getOnlineNotifications, addFriend, getFriendList } =
-        socketHandlers(io, socket);
+      const {
+        getOnlineNotifications,
+        addFriend,
+        handlePrivateMessage,
+        handleDisconnect,
+      } = socketHandlers(io, socket);
       socket.on("notify connected", getOnlineNotifications);
       socket.on("add friend", addFriend);
-      socket.on("get friends", getFriendList);
+      socket.on("private message", handlePrivateMessage);
+      socket.on("disconnect", handleDisconnect);
     };
 
     io.on("connection", onConnection);
