@@ -34,6 +34,7 @@ const Chat = () => {
     }),
     shallow
   );
+
   const { updateMessages, resetChat } = useChat((state) => ({
     updateMessages: state.updateMessages,
     resetChat: state.resetChat,
@@ -56,7 +57,6 @@ const Chat = () => {
         friendIds: user!.friends.map((friend) => friend._id),
       });
       socket.on("add friend:success", (friend: OneUser) => {
-        console.log("moi di choi tet ve");
         updateUserFriendList(friend);
       });
       socket.on("add friend:request", (friend: OneUser, userId: string) => {
@@ -76,7 +76,6 @@ const Chat = () => {
         updateFriendStatus(userId, true);
       });
       socket.on("user disconnection", (userId: string) => {
-        console.log("co ai out ne");
         updateFriendStatus(userId, false);
       });
     }
@@ -90,7 +89,6 @@ const Chat = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasGoogleLogged]);
-
   if (!hasGoogleLogged) {
     return <Redirect to="/" />;
   }

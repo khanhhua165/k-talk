@@ -7,7 +7,7 @@ import Button from "@material-ui/core/Button";
 import Box from "@material-ui/core/Box";
 import SendIcon from "@material-ui/icons/Send";
 import grey from "@material-ui/core/colors/grey";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useRef } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import shallow from "zustand/shallow";
@@ -38,6 +38,10 @@ const useStyle = makeStyles({
     paddingRight: "1rem",
     overflowY: "scroll",
   },
+  video: {
+    height: "300px",
+    width: "100%",
+  },
 });
 
 interface Input {
@@ -56,7 +60,6 @@ const ChatWindow = () => {
     }),
     shallow
   );
-
   useEffect(() => {
     if (scrollRef.current !== null) {
       scrollRef.current!.scrollIntoView({ behavior: "smooth" });
@@ -133,7 +136,6 @@ const ChatWindow = () => {
           </>
         )}
       </Box>
-
       <Box
         display="flex"
         flexDirection="column"

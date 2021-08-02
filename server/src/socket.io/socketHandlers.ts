@@ -1,4 +1,3 @@
-import { IUser } from "./../routes/users/user.interface";
 import userModel from "../routes/users/user.model";
 import { Server, Socket } from "socket.io";
 
@@ -14,6 +13,15 @@ export const socketHandlers = (io: Server, socket: Socket) => {
       if (!friend) {
         io.to(userId).emit("add friend:err", "No user found with this email");
       } else {
+        const user = await userModel.findById(userId);
+        if (
+          user?.friends &&
+          user.friends.findIndex((friendId) => friendId === friend._id) === -1
+        ) {
+          return io
+            .to(userId)
+            .emit("add friend:err", "User has already been added!");
+        }
         const updatedUser = await userModel.findByIdAndUpdate(
           userId,
           { $push: { friends: friend._id } },
