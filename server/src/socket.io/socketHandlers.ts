@@ -16,7 +16,7 @@ export const socketHandlers = (io: Server, socket: Socket) => {
         const user = await userModel.findById(userId);
         if (
           user?.friends &&
-          user.friends.findIndex((friendId) => friendId === friend._id) === -1
+          user.friends.findIndex((friendId) => friendId === friend._id) !== -1
         ) {
           return io
             .to(userId)
