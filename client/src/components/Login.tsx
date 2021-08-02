@@ -10,7 +10,7 @@ import GoogleLogin, {
 import { blue } from "@material-ui/core/colors";
 import { useState } from "react";
 import axios from "axios";
-import { API_URL } from "../constants/api";
+import { API_URL, GOOGLE_ID } from "../constants/api";
 import { LoginResponse } from "../interfaces/login.interface";
 import useAuth from "../store/useAuth";
 import { Redirect } from "react-router-dom";
@@ -177,7 +177,7 @@ const Login = () => {
             Let's Communicate!
           </Typography>
           <GoogleLogin
-            clientId={process.env.REACT_APP_GOOGLE_ID!}
+            clientId={GOOGLE_ID}
             buttonText="Log in with Google"
             cookiePolicy={"single_host_origin"}
             onFailure={handleFailure}

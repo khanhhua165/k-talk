@@ -20,7 +20,7 @@ class App {
     this.port = port;
     this.io = new Server(this.server, {
       cors: {
-        origin: process.env.CLIENT_URL!,
+        origin: "*",
       },
     });
 
