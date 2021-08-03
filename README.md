@@ -5,6 +5,8 @@
 - A not so mobile-friendly and simple chat app using socket.io
 - User can login with Google account and add friends that have already registered in the website.
 
+You can add me (billiejoe165@gmail.com) to test the app.
+
 ## Table of contents
 
 1. [Tech Stack](#tech-stack-)
